@@ -1,0 +1,86 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="C:\Users\Itorius\Documents\My Games\Terraria\ModLoader\references\tModLoader.targets" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{0D00D2A2-A457-4D47-960D-09DD943CB0C8}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>TerraFirma</RootNamespace>
+    <AssemblyName>TerraFirma</AssemblyName>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <LangVersion>7.3</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Items\AreaMarker.cs" />
+    <Compile Include="Items\Blueprint.cs" />
+    <Compile Include="Items\Builder.cs" />
+    <Compile Include="Items\TestTile.cs" />
+    <Compile Include="Items\LightStaff.cs" />
+    <Compile Include="Items\Quarry.cs" />
+    <Compile Include="TerraFirma.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TFPlayer.cs" />
+    <Compile Include="TileEntities\TEBuilder.cs" />
+    <Compile Include="TileEntities\TETestTile.cs" />
+    <Compile Include="TileEntities\TEQuarry.cs" />
+    <Compile Include="Tiles\Builder.cs" />
+    <Compile Include="Tiles\TestTile.cs" />
+    <Compile Include="Tiles\LightTile.cs" />
+    <Compile Include="Tiles\Quarry.cs" />
+    <Compile Include="UI\AreaMarkerUI.cs" />
+    <Compile Include="UI\BuilderUI.cs" />
+    <Compile Include="UI\QuarryPanel.cs" />
+    <Compile Include="Utility.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="build.txt" />
+    <Content Include="description.txt" />
+    <Content Include="Textures\Items\AreaMarker.png" />
+    <Content Include="Textures\Items\Blueprint.png" />
+    <Content Include="Textures\Items\Builder.png" />
+    <Content Include="Textures\Items\Elevator.png" />
+    <Content Include="Textures\Items\LightStaff.png" />
+    <Content Include="Textures\Items\Quarry.png" />
+    <Content Include="Textures\Tiles\Builder.png" />
+    <Content Include="Textures\Tiles\Elevator.png" />
+    <Content Include="Textures\Tiles\ElevatorTop.png" />
+    <Content Include="Textures\Tiles\LightTile.png" />
+    <Content Include="Textures\Tiles\Quarry.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Libraries\BaseLibrary\BaseLibrary.csproj">
+      <Project>{0387FE69-7E77-4DC7-9867-EC3994E946D2}</Project>
+      <Name>BaseLibrary</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Libraries\ContainerLibrary\ContainerLibrary.csproj">
+      <Project>{9FE1AF9C-346A-4106-8E05-CD9E271E2BEE}</Project>
+      <Name>ContainerLibrary</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>"C:\Program Files (x86)\Steam\steamapps\common\Terraria\TerrariaServer.exe" -build "$(ProjectDir)\" -eac "$(TargetPath)"</PostBuildEvent>
+  </PropertyGroup>
+</Project>
