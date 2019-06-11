@@ -16,12 +16,14 @@ namespace TerraFirma
         {
             if (Miniaturizing)
             {
-                if (scale > 0.75f) scale -= 0.005f;
-                if (scale < 0.75f) scale += 0.005f;
+                if (scale > 0.5f) scale -= 0.005f;
+                if (scale < 0.5f) scale += 0.005f;
 				else InTube = true;
             }
-			scale = 1f;
-            if (InTube || Miniaturizing || Maximizing)
+
+			
+
+			if (InTube || Miniaturizing || Maximizing)
             {
                 player.width = (int)(Player.defaultWidth * scale);
 
@@ -33,7 +35,10 @@ namespace TerraFirma
                 player.immuneTime = 2;
                 player.immuneNoBlink = true;
             }
-        }
+
+			//player.fullRotationOrigin = new Vector2(player.width,player.height)*0.5f;
+			player.fullRotation += 0.05f;
+		}
 
         public override void ModifyDrawInfo(ref PlayerDrawInfo drawInfo)
         {

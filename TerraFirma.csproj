@@ -33,6 +33,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Hooking.cs" />
     <Compile Include="Items\AreaMarker.cs" />
     <Compile Include="Items\Blueprint.cs" />
     <Compile Include="Items\Builder.cs" />
