@@ -1,48 +1,77 @@
 ﻿using Microsoft.Xna.Framework;
+using System;
+using System.Collections.Generic;
+using TerraFirma.TileEntities;
 using Terraria;
 using Terraria.ModLoader;
 
 namespace TerraFirma
 {
-    public class TFPlayer : ModPlayer
-    {
-        public bool Miniaturizing = false;
-        public bool Maximizing = false;
-        public bool InTube;
+	public class TFPlayer : ModPlayer
+	{
+		public bool UsingTubeSystem => Miniaturizing || Maximizing || InTube;
 
-        private float scale = 1f;
+		public bool Miniaturizing = false;
+		public bool Maximizing = false;
+		public bool InTube;
 
-        public override void PreUpdate()
-        {
-            if (Miniaturizing)
-            {
-                if (scale > 0.5f) scale -= 0.005f;
-                if (scale < 0.5f) scale += 0.005f;
+		public float scale = 1f;
+
+		public override void PreUpdate()
+		{
+			if (UsingTubeSystem)
+			{
+				player.width = (int)(Player.defaultWidth * scale);
+
+				player.position.Y += player.height;
+				player.height = (int)(Player.defaultHeight * scale);
+				player.position.Y -= player.height;
+
+				player.immune = true;
+				player.immuneTime = 2;
+				player.immuneNoBlink = true;
+			}
+
+			if (Miniaturizing)
+			{
+				float maxScale = 0.3f;
+				if (scale > maxScale) scale -= 0.05f;
+				if (scale < maxScale) scale += 0.05f;
 				else InTube = true;
-            }
 
-			
+				player.position = TETestTile.Position.ToWorldCoordinates(24f, -96f) + new Vector2(
+					                  (float)Math.Round(Math.Cos(TETestTile.t), 3),
+					                  (float)Math.Round(Math.Sin(TETestTile.t), 3)) * 48f;
 
-			if (InTube || Miniaturizing || Maximizing)
-            {
-                player.width = (int)(Player.defaultWidth * scale);
+				player.velocity = new Vector2(-0.001f);
 
-                player.position.Y += player.height;
-                player.height = (int)(Player.defaultHeight * scale);
-                player.position.Y -= player.height;
+				player.fullRotation = 0f;
 
-                player.immune = true;
-                player.immuneTime = 2;
-                player.immuneNoBlink = true;
-            }
-
-			//player.fullRotationOrigin = new Vector2(player.width,player.height)*0.5f;
-			player.fullRotation += 0.05f;
+				player.gravity = 0f;
+				player.fallStart = 0;
+				player.fallStart2 = 0;
+				player.wings = 0;
+				player.wingsLogic = 0;
+				player.wingTime = 0;
+				player.jump = 0;
+				player.wingFrame = 0;
+			}
 		}
 
-        public override void ModifyDrawInfo(ref PlayerDrawInfo drawInfo)
-        {
-
-        }
-    }
+		public override void SetControls()
+		{
+			if (UsingTubeSystem)
+			{
+				player.controlJump = false;
+				player.controlDown = false;
+				player.controlLeft = false;
+				player.controlRight = false;
+				player.controlUp = false;
+				player.controlUseItem = false;
+				player.controlUseTile = false;
+				player.controlThrow = false;
+				player.gravDir = 1f;
+			}
+		}
+	}
 }

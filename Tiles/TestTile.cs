@@ -53,7 +53,6 @@ namespace TerraFirma.Tiles
 
 			Vector2 position = testTile.Hitbox.TopLeft() - Main.screenPosition;
 
-			spriteBatch.Draw(Main.magicPixel, new Rectangle((int)position.X, (int)position.Y, testTile.Hitbox.Width, testTile.Hitbox.Height), Color.Black);
 		}
 
 		public override void KillMultiTile(int i, int j, int frameX, int frameY)

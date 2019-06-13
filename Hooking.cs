@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using BaseLibrary;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.DataStructures;
@@ -8,107 +9,130 @@ namespace TerraFirma
 {
 	public static class Hooking
 	{
+		internal static RenderTarget2D[] playerTargets;
+
 		internal static void Initialize()
 		{
+			playerTargets = new RenderTarget2D[Main.player.Length];
+
 			On.Terraria.Main.DrawPlayer += Main_DrawPlayer;
 			On.Terraria.Main.DrawPlayer_DrawAllLayers += Main_DrawPlayer_DrawAllLayers;
 
 			Main.graphics.PreparingDeviceSettings += SetPreserveContents;
+
+			Main.OnRenderTargetsInitialized += InitializePlayerTargets;
+			Main.OnRenderTargetsReleased += ReleasePlayerTargets;
+
+			Scheduler.EnqueueMessage(() =>
+			{
+				Main.ToggleFullScreen();
+				Main.ToggleFullScreen();
+			});
 		}
 
 		internal static void Uninitialize()
 		{
 			Main.graphics.PreparingDeviceSettings -= SetPreserveContents;
+
+			Main.OnRenderTargetsInitialized -= InitializePlayerTargets;
+			Main.OnRenderTargetsReleased -= ReleasePlayerTargets;
 		}
 
-		internal static void SetPreserveContents(object sender, PreparingDeviceSettingsEventArgs args) => args.GraphicsDeviceInformation.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;
-
-		// need render target for each player
-		static RenderTarget2D target;
-
-		internal static void Main_DrawPlayer_DrawAllLayers(On.Terraria.Main.orig_DrawPlayer_DrawAllLayers orig, Main self, Player drawPlayer, int projectileDrawPosition, int cHead)
+		private static void InitializePlayerTargets(int width, int height)
 		{
-			try
+			for (int i = 0; i < playerTargets.Length; i++)
 			{
-				if (target == null)
-					target = new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
+				ref RenderTarget2D target = ref playerTargets[i];
+				if (target != null) target = new RenderTarget2D(Main.graphics.GraphicsDevice, width, height);
+			}
+		}
 
-				Main.spriteBatch.End();
-				Main.graphics.GraphicsDevice.SetRenderTarget(target);
-				Main.graphics.GraphicsDevice.Clear(Color.Transparent);
+		private static void ReleasePlayerTargets()
+		{
+			foreach (RenderTarget2D target in playerTargets)
+			{
+				target?.Dispose();
+			}
+		}
 
-				Main.spriteBatch.Begin();
+		private static void SetPreserveContents(object sender, PreparingDeviceSettingsEventArgs args) => args.GraphicsDeviceInformation.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;
 
-				int num = -1;
-				for (int i = 0; i <= Main.playerDrawData.Count; i++)
+		private static void Main_DrawPlayer_DrawAllLayers(On.Terraria.Main.orig_DrawPlayer_DrawAllLayers orig, Main self, Player drawPlayer, int projectileDrawPosition, int cHead)
+		{
+			RenderTarget2D target = playerTargets[drawPlayer.whoAmI] ?? new RenderTarget2D(Main.graphics.GraphicsDevice, Main.screenWidth, Main.screenHeight);
+
+			Main.spriteBatch.End();
+			Main.graphics.GraphicsDevice.SetRenderTarget(target);
+			Main.graphics.GraphicsDevice.Clear(Color.Transparent);
+
+			Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.Default, RasterizerState.CullCounterClockwise);
+
+			int num = -1;
+			for (int i = 0; i <= Main.playerDrawData.Count; i++)
+			{
+				if (projectileDrawPosition == i)
 				{
-					if (projectileDrawPosition == i)
+					if (num != 0)
 					{
-						if (num != 0)
-						{
-							Main.pixelShader.CurrentTechnique.Passes[0].Apply();
-							num = 0;
-						}
-						Main.projectile[drawPlayer.heldProj].gfxOffY = drawPlayer.gfxOffY;
-						try
-						{
-							self.DrawProj(drawPlayer.heldProj);
-						}
-						catch
-						{
-							Main.projectile[drawPlayer.heldProj].active = false;
-						}
+						Main.pixelShader.CurrentTechnique.Passes[0].Apply();
+						num = 0;
 					}
-					if (i != Main.playerDrawData.Count)
+
+					Main.projectile[drawPlayer.heldProj].gfxOffY = drawPlayer.gfxOffY;
+					try
 					{
-						DrawData value = Main.playerDrawData[i];
-						if (!value.sourceRect.HasValue)
-						{
-							value.sourceRect = new Microsoft.Xna.Framework.Rectangle?(value.texture.Frame(1, 1, 0, 0));
-						}
-						if (value.shader >= 0)
-						{
-							GameShaders.Hair.Apply(0, drawPlayer, new DrawData?(value));
-							GameShaders.Armor.Apply(value.shader, drawPlayer, new DrawData?(value));
-						}
-						else if (drawPlayer.head == 0)
-						{
-							GameShaders.Hair.Apply(0, drawPlayer, new DrawData?(value));
-							GameShaders.Armor.Apply(cHead, drawPlayer, new DrawData?(value));
-						}
-						else
-						{
-							GameShaders.Armor.Apply(0, drawPlayer, new DrawData?(value));
-							GameShaders.Hair.Apply((short)(-(short)value.shader), drawPlayer, new DrawData?(value));
-						}
-						num = value.shader;
-						if (value.texture != null)
-						{
-							value.Draw(Main.spriteBatch);
-						}
+						self.DrawProj(drawPlayer.heldProj);
+					}
+					catch
+					{
+						Main.projectile[drawPlayer.heldProj].active = false;
 					}
 				}
 
-				Main.spriteBatch.End();
-				Main.graphics.GraphicsDevice.SetRenderTarget(null);
+				if (i != Main.playerDrawData.Count)
+				{
+					DrawData value = Main.playerDrawData[i];
+					if (!value.sourceRect.HasValue) value.sourceRect = value.texture.Frame();
 
-				Main.spriteBatch.Begin();
-				Main.spriteBatch.Draw(target, new Vector2(Main.screenWidth, Main.screenHeight) * (0.25f), null, Color.White, 0f, Vector2.Zero, 0.5f, SpriteEffects.None, 0f);
-			}
-			catch
-			{
+					if (value.shader >= 0)
+					{
+						GameShaders.Hair.Apply(0, drawPlayer, value);
+						GameShaders.Armor.Apply(value.shader, drawPlayer, value);
+					}
+					else if (drawPlayer.head == 0)
+					{
+						GameShaders.Hair.Apply(0, drawPlayer, value);
+						GameShaders.Armor.Apply(cHead, drawPlayer, value);
+					}
+					else
+					{
+						GameShaders.Armor.Apply(0, drawPlayer, value);
+						GameShaders.Hair.Apply((short)-(short)value.shader, drawPlayer, value);
+					}
 
+					num = value.shader;
+					if (value.texture != null) value.Draw(Main.spriteBatch);
+				}
 			}
+
+			Main.spriteBatch.End();
+			Main.graphics.GraphicsDevice.SetRenderTarget(null);
+			Main.spriteBatch.Begin();
+
+			float scale = drawPlayer.GetModPlayer<TFPlayer>().scale;
+
+			Main.spriteBatch.Draw(target, drawPlayer.position - Main.screenPosition, null, Color.White, 0f, drawPlayer.position - Main.screenPosition, scale, SpriteEffects.None, 0f);
 		}
 
-		// reset player size for drawing
-		internal static void Main_DrawPlayer(On.Terraria.Main.orig_DrawPlayer orig, Main self, Player drawPlayer, Vector2 Position, float rotation, Vector2 rotationOrigin, float shadow)
+		private static void Main_DrawPlayer(On.Terraria.Main.orig_DrawPlayer orig, Main self, Player drawPlayer, Vector2 Position, float rotation, Vector2 rotationOrigin, float shadow)
 		{
 			int playerWidth = drawPlayer.width;
 			int playerHeight = drawPlayer.height;
 
 			drawPlayer.width = Player.defaultWidth;
 			drawPlayer.height = Player.defaultHeight;
+
+			if (drawPlayer.GetModPlayer<TFPlayer>().Miniaturizing) drawPlayer.wingFrame = 0;
 
 			orig(self, drawPlayer, Position, rotation, new Vector2(drawPlayer.width, drawPlayer.height) * 0.5f, shadow);
 
