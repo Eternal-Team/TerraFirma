@@ -19,6 +19,7 @@ namespace TerraFirma
 
 		public override void PreUpdate()
 		{
+			Miniaturizing = true;
 			if (UsingTubeSystem)
 			{
 				player.width = (int)(Player.defaultWidth * scale);
@@ -34,27 +35,23 @@ namespace TerraFirma
 
 			if (Miniaturizing)
 			{
-				float maxScale = 0.3f;
+				float maxScale = 0.5f;
 				if (scale > maxScale) scale -= 0.05f;
 				if (scale < maxScale) scale += 0.05f;
 				else InTube = true;
 
-				player.position = TETestTile.Position.ToWorldCoordinates(24f, -96f) + new Vector2(
-					                  (float)Math.Round(Math.Cos(TETestTile.t), 3),
-					                  (float)Math.Round(Math.Sin(TETestTile.t), 3)) * 48f;
+				//player.velocity = new Vector2(-0.001f);
 
-				player.velocity = new Vector2(-0.001f);
+				//player.fullRotation = 0f;
 
-				player.fullRotation = 0f;
-
-				player.gravity = 0f;
-				player.fallStart = 0;
-				player.fallStart2 = 0;
-				player.wings = 0;
-				player.wingsLogic = 0;
-				player.wingTime = 0;
-				player.jump = 0;
-				player.wingFrame = 0;
+				//player.gravity = 0f;
+				//player.fallStart = 0;
+				//player.jump = 0;
+				//player.fallStart2 = 0;
+				//player.wings = 0;
+				//player.wingsLogic = 0;
+				//player.wingTime = 0;
+				//player.wingFrame = 0;
 			}
 		}
 
@@ -62,15 +59,15 @@ namespace TerraFirma
 		{
 			if (UsingTubeSystem)
 			{
-				player.controlJump = false;
-				player.controlDown = false;
-				player.controlLeft = false;
-				player.controlRight = false;
-				player.controlUp = false;
-				player.controlUseItem = false;
-				player.controlUseTile = false;
-				player.controlThrow = false;
-				player.gravDir = 1f;
+				//player.controlJump = false;
+				//player.controlDown = false;
+				//player.controlLeft = false;
+				//player.controlRight = false;
+				//player.controlUp = false;
+				//player.controlUseItem = false;
+				//player.controlUseTile = false;
+				//player.controlThrow = false;
+				//player.gravDir = 1f;
 			}
 		}
 	}
