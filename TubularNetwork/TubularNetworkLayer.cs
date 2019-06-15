@@ -14,5 +14,12 @@ namespace TerraFirma.TubularNetwork
 
 			foreach (Tube tube in data.Values) tube.Merge();
 		}
+
+		public override void Update()
+		{
+			base.Update();
+
+			foreach (TubularNetwork network in TubularNetwork.Networks) network.Update();
+		}
 	}
 }

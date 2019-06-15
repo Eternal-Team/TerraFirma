@@ -3,6 +3,7 @@ using BaseLibrary.UI;
 using BaseLibrary.UI.Elements;
 using Microsoft.Xna.Framework;
 using TerraFirma.TileEntities;
+using TerraFirma.TubularNetwork;
 using Terraria;
 
 namespace TerraFirma.UI
@@ -88,7 +89,13 @@ namespace TerraFirma.UI
 				};
 				entryPointItem.OnClick += (evt, element) =>
 				{
-					if (Main.LocalPlayer.getRect().Intersects(Container.Hitbox)) Main.LocalPlayer.Bottom = entryPoint.Hitbox.Bottom();
+					TubularNetwork.TubularNetwork network = TerraFirma.Instance.TubeNetworkLayer[Container.Position].Network;
+
+					TransportingPlayer transfer = new TransportingPlayer();
+					transfer.player = Main.LocalPlayer;
+					transfer.path = network.FindPath(Container.Position, entryPoint.Position);
+
+					network.TransportingPlayers.Add(transfer);
 				};
 				gridLocations.Add(entryPointItem);
 			}
