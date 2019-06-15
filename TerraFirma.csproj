@@ -37,7 +37,7 @@
     <Compile Include="Items\AreaMarker.cs" />
     <Compile Include="Items\Blueprint.cs" />
     <Compile Include="Items\Builder.cs" />
-    <Compile Include="Items\TestTile.cs" />
+    <Compile Include="Items\EntryPoint.cs" />
     <Compile Include="Items\LightStaff.cs" />
     <Compile Include="Items\Quarry.cs" />
     <Compile Include="TerraFirma.cs" />
@@ -45,10 +45,10 @@
     <Compile Include="TFPlayer.cs" />
     <Compile Include="TFWorld.cs" />
     <Compile Include="TileEntities\TEBuilder.cs" />
-    <Compile Include="TileEntities\TETestTile.cs" />
+    <Compile Include="TileEntities\TEEntryPoint.cs" />
     <Compile Include="TileEntities\TEQuarry.cs" />
     <Compile Include="Tiles\Builder.cs" />
-    <Compile Include="Tiles\TestTile.cs" />
+    <Compile Include="Tiles\EntryPoint.cs" />
     <Compile Include="Tiles\LightTile.cs" />
     <Compile Include="Tiles\Quarry.cs" />
     <Compile Include="UI\AreaMarkerUI.cs" />

@@ -7,11 +7,11 @@ using Terraria.DataStructures;
 
 namespace TerraFirma.TileEntities
 {
-	public class TETestTile : BaseTE
+	public class TEEntryPoint : BaseTE
 	{
 		public Rectangle Hitbox => new Rectangle(Position.X * 16, Position.Y * 16 - 48, 48, 48);
 
-		public override Type TileType => typeof(TestTile);
+		public override Type TileType => typeof(EntryPoint);
 
 		public static float t;
 		public static Point16 Position;

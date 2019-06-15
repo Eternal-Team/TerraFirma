@@ -1,8 +1,4 @@
-﻿using Microsoft.Xna.Framework;
-using System;
-using System.Collections.Generic;
-using TerraFirma.TileEntities;
-using Terraria;
+﻿using Terraria;
 using Terraria.ModLoader;
 
 namespace TerraFirma
@@ -11,7 +7,7 @@ namespace TerraFirma
 	{
 		public bool UsingTubeSystem => Miniaturizing || Maximizing || InTube;
 
-		public bool Miniaturizing = false;
+		public bool Miniaturizing;
 		public bool Maximizing = false;
 		public bool InTube;
 
@@ -35,7 +31,7 @@ namespace TerraFirma
 
 			if (Miniaturizing)
 			{
-				float maxScale = 0.5f;
+				float maxScale = 1f;
 				if (scale > maxScale) scale -= 0.05f;
 				if (scale < maxScale) scale += 0.05f;
 				else InTube = true;

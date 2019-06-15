@@ -2,11 +2,11 @@
 
 namespace TerraFirma.Items
 {
-	public class TestTile : BaseItem
+	public class EntryPoint : BaseItem
 	{
 		public override void SetStaticDefaults()
 		{
-			DisplayName.SetDefault("test tile");
+			DisplayName.SetDefault("Entry Point");
 			Tooltip.SetDefault("bzoom");
 		}
 
@@ -21,7 +21,7 @@ namespace TerraFirma.Items
 			item.useTime = 10;
 			item.useStyle = 1;
 			item.consumable = true;
-			item.createTile = mod.TileType<Tiles.TestTile>();
+			item.createTile = mod.TileType<Tiles.EntryPoint>();
 		}
 	}
 }

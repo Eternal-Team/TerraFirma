@@ -1,6 +1,8 @@
 ﻿using BaseLibrary;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MonoMod.Cil;
+using System;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.Graphics.Shaders;
@@ -23,11 +25,34 @@ namespace TerraFirma
 			Main.OnRenderTargetsInitialized += InitializePlayerTargets;
 			Main.OnRenderTargetsReleased += ReleasePlayerTargets;
 
+			IL.Terraria.Main.DoDraw += Main_DoDraw;
+
 			Scheduler.EnqueueMessage(() =>
 			{
 				Main.ToggleFullScreen();
 				Main.ToggleFullScreen();
 			});
+		}
+
+		private static void Main_DoDraw(ILContext il)
+		{
+			ILCursor cursor = new ILCursor(il);
+
+			if (cursor.TryGotoNext(
+				i => i.MatchCall<Main>("DrawWoF"))
+			)
+			{
+				cursor.EmitDelegate<Action>(() =>
+				{
+					SpriteBatchState state = Utility.End(Main.spriteBatch);
+					Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.Default, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.ZoomMatrix);
+
+					TerraFirma.Instance.layer.Draw(Main.spriteBatch);
+
+					Main.spriteBatch.End();
+					Main.spriteBatch.Begin(state);
+				});
+			}
 		}
 
 		internal static void Uninitialize()
@@ -117,11 +142,15 @@ namespace TerraFirma
 
 			Main.spriteBatch.End();
 			Main.graphics.GraphicsDevice.SetRenderTarget(null);
-			Main.spriteBatch.Begin();
 
 			float scale = drawPlayer.GetModPlayer<TFPlayer>().scale;
 
-			Main.spriteBatch.Draw(target, drawPlayer.position - Main.screenPosition, null, Color.White, 0f, drawPlayer.position - Main.screenPosition, scale, SpriteEffects.None, 0f);
+			Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.Default, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.ZoomMatrix);
+
+			Main.spriteBatch.Draw(target, new Vector2(Main.screenWidth, Main.screenHeight) * 0.5f + new Vector2(0, 8 - 8 * scale), null, Color.White, 0f, target.Size() * 0.5f, scale, SpriteEffects.None, 0f);
+
+			Main.spriteBatch.End();
+			Main.spriteBatch.Begin();
 		}
 
 		private static void Main_DrawPlayer(On.Terraria.Main.orig_DrawPlayer orig, Main self, Player drawPlayer, Vector2 Position, float rotation, Vector2 rotationOrigin, float shadow)
