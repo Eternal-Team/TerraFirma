@@ -1,34 +1,35 @@
-﻿using System;
-using BaseLibrary.Tiles.TileEntites;
+﻿using BaseLibrary.Tiles.TileEntites;
+using BaseLibrary.UI;
 using Microsoft.Xna.Framework;
+using System;
 using TerraFirma.Tiles;
 using Terraria;
-using Terraria.DataStructures;
+using Terraria.Audio;
+using Terraria.ID;
 
 namespace TerraFirma.TileEntities
 {
-	public class TEEntryPoint : BaseTE
+	public class TEEntryPoint : BaseTE, IHasUI
 	{
-		public Rectangle Hitbox => new Rectangle(Position.X * 16, Position.Y * 16 - 48, 48, 48);
+		public Rectangle Hitbox => new Rectangle(Position.X * 16, Position.Y * 16, 48, 56);
 
 		public override Type TileType => typeof(EntryPoint);
 
-		public static float t;
-		public static Point16 Position;
-
 		public override void Update()
 		{
-			t -= 0.05f;
-			Position = base.Position;
-
-            foreach (Player player in Main.player)
+			foreach (Player player in Main.player)
 			{
 				if (player.active && !player.dead)
 				{
 					TFPlayer tfPlayer = player.GetModPlayer<TFPlayer>();
-                    tfPlayer.Miniaturizing = false;
+					tfPlayer.Miniaturizing = false;
 				}
 			}
 		}
+
+		public Guid ID { get; set; }
+		public BaseUIPanel UI { get; set; }
+		public LegacySoundStyle CloseSound => SoundID.Item1;
+		public LegacySoundStyle OpenSound => SoundID.Item1;
 	}
 }

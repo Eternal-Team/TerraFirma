@@ -47,7 +47,7 @@ namespace TerraFirma
 					SpriteBatchState state = Utility.End(Main.spriteBatch);
 					Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.Default, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.ZoomMatrix);
 
-					TerraFirma.Instance.layer.Draw(Main.spriteBatch);
+					TerraFirma.Instance.TubeNetworkLayer.Draw(Main.spriteBatch);
 
 					Main.spriteBatch.End();
 					Main.spriteBatch.Begin(state);

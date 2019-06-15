@@ -3,6 +3,7 @@ using BaseLibrary.Tiles;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using TerraFirma.TileEntities;
+using TerraFirma.TubularNetwork;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
@@ -42,6 +43,8 @@ namespace TerraFirma.Tiles
 		{
 			TEEntryPoint entryPoint = mod.GetTileEntity<TEEntryPoint>(i, j);
 			if (entryPoint == null) return;
+
+			BaseLibrary.BaseLibrary.PanelGUI.UI.HandleUI(entryPoint);
 		}
 
 		public override void DrawEffects(int i, int j, SpriteBatch spriteBatch, ref Color drawColor, ref int nextSpecialDrawIndex)
@@ -51,7 +54,7 @@ namespace TerraFirma.Tiles
 			nextSpecialDrawIndex++;
 		}
 
-		public override bool CanPlace(int i, int j) => TerraFirma.Instance.layer.ContainsKey(i, j - 3);
+		public override bool CanPlace(int i, int j) => TerraFirma.Instance.TubeNetworkLayer.ContainsKey(i, j - 3);
 
 		public override void SpecialDraw(int i, int j, SpriteBatch spriteBatch)
 		{
@@ -60,17 +63,19 @@ namespace TerraFirma.Tiles
 
 			Vector2 position = new Vector2(i, j) * 16 - Main.screenPosition;
 
-			if (TerraFirma.Instance.layer.GetNeighbor(i, j, Side.Top) != null)
+			Tube tube = TerraFirma.Instance.TubeNetworkLayer[i, j];
+
+			if (tube.GetNeighbor(Side.Top) != null)
 			{
 				spriteBatch.Draw(ConnectionTexture, position + new Vector2(6, 0));
 			}
 
-			if (TerraFirma.Instance.layer.GetNeighbor(i, j, Side.Left) != null)
+			if (tube.GetNeighbor(Side.Left) != null)
 			{
 				spriteBatch.Draw(ConnectionTexture, position + new Vector2(-2, 24), null, Color.White, -MathHelper.PiOver2, ConnectionTexture.Size() * 0.5f, Vector2.One, SpriteEffects.None, 0f);
 			}
 
-			if (TerraFirma.Instance.layer.GetNeighbor(i, j, Side.Right) != null)
+			if (tube.GetNeighbor(Side.Right) != null)
 			{
 				spriteBatch.Draw(ConnectionTexture, position + new Vector2(50, 24), null, Color.White, MathHelper.PiOver2, ConnectionTexture.Size() * 0.5f, Vector2.One, SpriteEffects.None, 0f);
 			}
@@ -79,6 +84,8 @@ namespace TerraFirma.Tiles
 		public override void KillMultiTile(int i, int j, int frameX, int frameY)
 		{
 			TEEntryPoint entryPoint = mod.GetTileEntity<TEEntryPoint>(i, j);
+
+			BaseLibrary.BaseLibrary.PanelGUI.UI.CloseUI(entryPoint);
 
 			Item.NewItem(i * 16, j * 16, 48, 64, mod.ItemType<Items.EntryPoint>());
 			entryPoint.Kill(i, j);

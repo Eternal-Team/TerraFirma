@@ -8,12 +8,17 @@ namespace TerraFirma
 	{
 		public override TagCompound Save() => new TagCompound
 		{
-			["TubularNetwork"] = TerraFirma.Instance.layer.Save()
+			["TubularNetwork"] = TerraFirma.Instance.TubeNetworkLayer.Save()
 		};
 
 		public override void Load(TagCompound tag)
 		{
-			TerraFirma.Instance.layer.Load(tag.GetList<TagCompound>("TubularNetwork").ToList());
+			TerraFirma.Instance.TubeNetworkLayer.Load(tag.GetList<TagCompound>("TubularNetwork").ToList());
+		}
+
+		public override void PostUpdate()
+		{
+			TerraFirma.Instance.TubeNetworkLayer.Update();
 		}
 	}
 }
