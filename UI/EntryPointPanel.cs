@@ -2,9 +2,11 @@
 using BaseLibrary.UI;
 using BaseLibrary.UI.Elements;
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
 using TerraFirma.TileEntities;
 using TerraFirma.TubularNetwork;
 using Terraria;
+using Terraria.DataStructures;
 
 namespace TerraFirma.UI
 {
@@ -90,12 +92,19 @@ namespace TerraFirma.UI
 				entryPointItem.OnClick += (evt, element) =>
 				{
 					TubularNetwork.TubularNetwork network = TerraFirma.Instance.TubeNetworkLayer[Container.Position].Network;
+					Stack<Point16> path = network.FindPath(Container.Position, entryPoint.Position);
 
-					TransportingPlayer transfer = new TransportingPlayer();
-					transfer.player = Main.LocalPlayer;
-					transfer.path = network.FindPath(Container.Position, entryPoint.Position);
+					TransportingPlayer transfer = new TransportingPlayer
+					{
+						player = Main.LocalPlayer,
+						CurrentPosition = path.Pop(),
+						path = path
+					};
 
 					network.TransportingPlayers.Add(transfer);
+					Main.LocalPlayer.GetModPlayer<TFPlayer>().Miniaturizing = true;
+
+					BaseLibrary.BaseLibrary.PanelGUI.UI.CloseUI(Container);
 				};
 				gridLocations.Add(entryPointItem);
 			}

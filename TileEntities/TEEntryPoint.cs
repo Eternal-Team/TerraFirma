@@ -22,7 +22,6 @@ namespace TerraFirma.TileEntities
 				if (player.active && !player.dead)
 				{
 					TFPlayer tfPlayer = player.GetModPlayer<TFPlayer>();
-					tfPlayer.Miniaturizing = false;
 				}
 			}
 		}

@@ -52,6 +52,7 @@
     <Compile Include="Tiles\LightTile.cs" />
     <Compile Include="Tiles\Quarry.cs" />
     <Compile Include="TubularNetwork\Items\TubeItem.cs" />
+    <Compile Include="TubularNetwork\TransportingPlayer.cs" />
     <Compile Include="TubularNetwork\Tube.cs" />
     <Compile Include="TubularNetwork\TubularNetwork.cs" />
     <Compile Include="TubularNetwork\TubularNetworkLayer.cs" />

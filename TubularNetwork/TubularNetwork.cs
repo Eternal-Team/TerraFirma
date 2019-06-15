@@ -13,152 +13,136 @@ namespace TerraFirma.TubularNetwork
 	{
 		public static List<TubularNetwork> Networks = new List<TubularNetwork>();
 
-		public List<Tube> tiles;
+		private List<Tube> Tiles;
+
 		public Color debugColor;
-		public List<Point16> debugPath;
+
 		public List<TransportingPlayer> TransportingPlayers;
 
-		public TubularNetwork()
+		public TubularNetwork(Tube tube)
 		{
 			Networks.Add(this);
 
-			tiles = new List<Tube>();
+			Tiles = new List<Tube> { tube };
 			TransportingPlayers = new List<TransportingPlayer>();
 
 			debugColor = new Color(Main.rand.NextFloat(), Main.rand.NextFloat(), Main.rand.NextFloat());
 		}
-		
+
 		public void AddTile(Tube tile)
 		{
-			if (!tiles.Contains(tile))
+			if (!Tiles.Contains(tile))
 			{
 				Networks.Remove(tile.Network);
 				tile.Network = this;
-				tiles.Add(tile);
+				Tiles.Add(tile);
 			}
 		}
 
 		public void RemoveTile(Tube tile)
 		{
-			if (tiles.Contains(tile))
+			if (Tiles.Contains(tile))
 			{
-				tiles.Remove(tile);
+				Tiles.Remove(tile);
 				Reform();
 			}
 		}
 
 		public void Merge(TubularNetwork other)
 		{
-			for (int i = 0; i < other.tiles.Count; i++) AddTile(other.tiles[i]);
+			for (int i = 0; i < other.Tiles.Count; i++) AddTile(other.Tiles[i]);
 		}
 
 		public void Reform()
 		{
 			Networks.Remove(this);
 
-			for (int i = 0; i < tiles.Count; i++)
-			{
-				tiles[i].Network = new TubularNetwork
-				{
-					tiles = new List<Tube> { tiles[i] }
-				};
-			}
+			for (int i = 0; i < Tiles.Count; i++) Tiles[i].Network = new TubularNetwork(Tiles[i]);
 
-			for (int i = 0; i < tiles.Count; i++) tiles[i].Merge();
+			for (int i = 0; i < Tiles.Count; i++) Tiles[i].Merge();
 		}
 
 		public void Update()
 		{
 			for (int i = 0; i < TransportingPlayers.Count; i++)
 			{
-				TransportingPlayer player = TransportingPlayers[i];
-				player.Update();
-				if (player.path.Count == 0) TransportingPlayers.Remove(player);
+				TransportingPlayer transportingPlayer = TransportingPlayers[i];
+				transportingPlayer.Update();
+
+				TFPlayer player = transportingPlayer.player.GetModPlayer<TFPlayer>();
+				if (!player.UsingTubeSystem) TransportingPlayers.Remove(transportingPlayer);
 			}
 		}
 
 		public IEnumerable<TEEntryPoint> GetEntryPoints()
 		{
-			foreach (Tube tube in tiles)
+			foreach (Tube tube in Tiles)
 			{
 				TEEntryPoint entryPoint = TerraFirma.Instance.GetTileEntity<TEEntryPoint>(tube.Position);
 				if (entryPoint != null) yield return entryPoint;
 			}
 		}
 
-		class Location
+		#region Pathfinding
+		private class Node
 		{
 			public int X;
 			public int Y;
+
 			public int F;
 			public int G;
 			public int H;
-			public Location Parent;
+
+			public Node Parent;
 		}
 
-		private int ComputeHScore(int x, int y, int targetX, int targetY) => Math.Abs(targetX - x) + Math.Abs(targetY - y);
+		private int ComputeHScore(Node current, Node target) => Math.Abs(target.X - current.X) + Math.Abs(target.Y - current.Y);
 
-		private IEnumerable<Location> GetWalkableAdjacentSquares(int x, int y)
+		private IEnumerable<Node> GetNeighborNodes(Node node)
 		{
-			return tiles.First(tube => tube.Position.X == x && tube.Position.Y == y).GetNeighbors().Select(neighbor => new Location { X = neighbor.Position.X, Y = neighbor.Position.Y });
+			return Tiles.First(tube => tube.Position.X == node.X && tube.Position.Y == node.Y).GetNeighbors().Select(neighbor => new Node { X = neighbor.Position.X, Y = neighbor.Position.Y });
 		}
 
 		public Stack<Point16> FindPath(Point16 startPos, Point16 endPos)
 		{
-			Location current = null;
-			var start = new Location { X = startPos.X, Y = startPos.Y };
-			var target = new Location { X = endPos.X, Y = endPos.Y };
-			var openList = new List<Location>();
-			var closedList = new List<Location>();
+			Node current = null;
+			var start = new Node { X = startPos.X, Y = startPos.Y };
+			var target = new Node { X = endPos.X, Y = endPos.Y };
+			var openList = new List<Node>();
+			var closedList = new List<Node>();
 			int g = 0;
 
-			// start by adding the original position to the open list
 			openList.Add(start);
 
 			while (openList.Count > 0)
 			{
-				// get the square with the lowest F score
 				var lowest = openList.Min(l => l.F);
 				current = openList.First(l => l.F == lowest);
 
-				// add the current square to the closed list
 				closedList.Add(current);
 
-				// remove it from the open list
 				openList.Remove(current);
 
-				// if we added the destination to the closed list, we've found a path
-				if (closedList.FirstOrDefault(l => l.X == target.X && l.Y == target.Y) != null)
-					break;
+				if (closedList.FirstOrDefault(l => l.X == target.X && l.Y == target.Y) != null) break;
 
-				// get neighbors
-				var adjacentSquares = GetWalkableAdjacentSquares(current.X, current.Y);
+				var adjacentSquares = GetNeighborNodes(current);
 				g++;
 
 				foreach (var adjacentSquare in adjacentSquares)
 				{
-					// if this adjacent square is already in the closed list, ignore it
-					if (closedList.FirstOrDefault(l => l.X == adjacentSquare.X
-					                                   && l.Y == adjacentSquare.Y) != null)
-						continue;
+					if (closedList.FirstOrDefault(l => l.X == adjacentSquare.X && l.Y == adjacentSquare.Y) != null) continue;
 
-					// if it's not in the open list...
-					if (openList.FirstOrDefault(l => l.X == adjacentSquare.X
-					                                 && l.Y == adjacentSquare.Y) == null)
+					if (openList.FirstOrDefault(l => l.X == adjacentSquare.X && l.Y == adjacentSquare.Y) == null)
 					{
-						// compute its score, set the parent
 						adjacentSquare.G = g;
-						adjacentSquare.H = ComputeHScore(adjacentSquare.X, adjacentSquare.Y, target.X, target.Y);
+						adjacentSquare.H = ComputeHScore(adjacentSquare, target);
 						adjacentSquare.F = adjacentSquare.G + adjacentSquare.H;
 						adjacentSquare.Parent = current;
 
-						// and add it to the open list
 						openList.Insert(0, adjacentSquare);
 					}
 					else
 					{
-						// test if using the current G score makes the adjacent square's F score
-						// lower, if yes update the parent because it means it's a better path
 						if (g + adjacentSquare.H < adjacentSquare.F)
 						{
 							adjacentSquare.G = g;
@@ -179,24 +163,6 @@ namespace TerraFirma.TubularNetwork
 
 			return points;
 		}
-	}
-
-	public class TransportingPlayer
-	{
-		public Player player;
-		public Stack<Point16> path;
-		public Point16 CurrentPosition;
-
-		private int timer = 0;
-
-		public void Update()
-		{
-			if (++timer > 10)
-			{
-				CurrentPosition = path.Pop();
-
-				timer = 0;
-			}
-		}
+		#endregion
 	}
 }
