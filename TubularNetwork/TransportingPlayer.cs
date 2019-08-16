@@ -1,44 +1,49 @@
-﻿using Microsoft.Xna.Framework;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Terraria;
 using Terraria.DataStructures;
 
-namespace TerraFirma.TubularNetwork
+namespace TerraFirma.Network
 {
-	// player is not centered on tube
-	// entering/exiting looks weird
-	// wings get drawn open
-	// mount doesn't get disabled
+	// bug: entering/exiting looks weird
 
 	public class TransportingPlayer
 	{
-		public Player player;
+		public TFPlayer player;
+
 		public Stack<Point16> path;
 		public Point16 CurrentPosition;
-		private Point16 PreviousPosition;
+		public Point16 PreviousPosition;
 
-		public const int speed = 5;
-		private int timer = speed;
+		public const int speed = 10;
+		public int timer = speed;
+
+		public TransportingPlayer(Player player, Stack<Point16> path)
+		{
+			this.player = player.GetModPlayer<TFPlayer>();
+			this.path = path;
+			CurrentPosition = PreviousPosition = path.Pop();
+
+			this.player.Entering = true;
+			this.player.transportingPlayer = this;
+		}
 
 		public void Update()
 		{
-			if (!player.GetModPlayer<TFPlayer>().Transporting) return;
+			if (!player.Transporting) return;
 
-			if (PreviousPosition == Point16.Zero) PreviousPosition = CurrentPosition;
-
-			Vector2 prevPos = PreviousPosition.ToVector2() * 16 + new Vector2(24, 24);
-			Vector2 nextPos = CurrentPosition.ToVector2() * 16 + new Vector2(24, 24);
-			player.Center = Vector2.Lerp(prevPos,nextPos , (float)timer / speed);
-			player.fullRotation = Vector2.Normalize(nextPos - prevPos).ToRotation()+MathHelper.PiOver2;
-			if (player.fullRotation > MathHelper.Pi) player.direction = -1;
-
-			if (++timer > speed)
+			if (++timer >= speed)
 			{
-				if (path.Count == 0) player.GetModPlayer<TFPlayer>().Maximizing = true;
+				PreviousPosition = CurrentPosition;
+
+				if (path.Count == 0)
+				{
+					player.alpha = 0f;
+					player.Exiting = true;
+				}
 				else
 				{
-					PreviousPosition = CurrentPosition;
 					CurrentPosition = path.Pop();
+					player.alpha = 1f;
 				}
 
 				timer = 0;

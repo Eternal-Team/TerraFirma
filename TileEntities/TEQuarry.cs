@@ -1,11 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using BaseLibrary;
+﻿using BaseLibrary;
 using BaseLibrary.Tiles.TileEntites;
 using BaseLibrary.UI;
 using ContainerLibrary;
+using EnergyLibrary;
 using Microsoft.Xna.Framework;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using TerraFirma.Tiles;
 using Terraria;
 using Terraria.Audio;
@@ -13,7 +14,7 @@ using Terraria.ID;
 
 namespace TerraFirma.TileEntities
 {
-	public class TEQuarry : BaseTE, IItemHandler, IHasUI
+	public class TEQuarry : BaseTE, IItemHandler, IHasUI, IEnergyHandler
 	{
 		//public int pickPower = 30;
 		//public int speed = 30;
@@ -26,8 +27,9 @@ namespace TerraFirma.TileEntities
 		public override Type TileType => typeof(Quarry);
 
 		public ItemHandler Handler { get; }
+		public EnergyHandler EnergyHandler { get; }
 
-		public Guid ID { get; set; }
+		public Guid UUID { get; set; }
 		public BaseUIPanel UI { get; set; }
 		public LegacySoundStyle CloseSound => SoundID.Item1;
 		public LegacySoundStyle OpenSound => SoundID.Item1;
@@ -45,10 +47,14 @@ namespace TerraFirma.TileEntities
 		public TEQuarry()
 		{
 			Handler = new ItemHandler(27);
+			EnergyHandler = new EnergyHandler(long.MaxValue, 10000);
 		}
 
 		public override void Update()
 		{
+			EnergyHandler.SetMaxTransfer(long.MaxValue);
+			EnergyHandler.InsertEnergy(Main.rand.Next(1000, 1000000));
+
 			if (!Active) return;
 
 			if (CurrentTile == default) CurrentTile = new Point(Position.X - 16, Position.Y + 4);

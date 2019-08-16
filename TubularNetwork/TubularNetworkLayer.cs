@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Terraria.ModLoader.IO;
 
-namespace TerraFirma.TubularNetwork
+namespace TerraFirma.Network
 {
 	public class TubularNetworkLayer : ModLayer<Tube>
 	{

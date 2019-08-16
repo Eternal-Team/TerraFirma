@@ -2,10 +2,11 @@
 using BaseLibrary.Tiles;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using TerraFirma.Network;
 using TerraFirma.TileEntities;
-using TerraFirma.TubularNetwork;
 using Terraria;
 using Terraria.DataStructures;
+using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ObjectData;
 
@@ -15,6 +16,7 @@ namespace TerraFirma.Tiles
 	{
 		public override string Texture => "TerraFirma/Textures/Tiles/EntryPoint";
 
+		// todo: possibly in TerraFirma.cs
 		private static Texture2D _connectionTexture;
 		public static Texture2D ConnectionTexture => _connectionTexture ?? (_connectionTexture = ModContent.GetTexture("TerraFirma/Textures/Tiles/EntryPoint_Connection"));
 
@@ -41,7 +43,7 @@ namespace TerraFirma.Tiles
 
 		public override void RightClick(int i, int j)
 		{
-			TEEntryPoint entryPoint = mod.GetTileEntity<TEEntryPoint>(i, j);
+			TEEntryPoint entryPoint = Utility.GetTileEntity<TEEntryPoint>(i, j);
 			if (entryPoint == null) return;
 
 			BaseLibrary.BaseLibrary.PanelGUI.UI.HandleUI(entryPoint);
@@ -58,10 +60,10 @@ namespace TerraFirma.Tiles
 
 		public override void SpecialDraw(int i, int j, SpriteBatch spriteBatch)
 		{
-			TEEntryPoint entryPoint = mod.GetTileEntity<TEEntryPoint>(i, j);
+			TEEntryPoint entryPoint = Utility.GetTileEntity<TEEntryPoint>(i, j);
 			if (entryPoint == null || !Main.tile[i, j].IsTopLeft()) return;
 
-			Vector2 position = new Vector2(i, j) * 16 - Main.screenPosition;
+			Vector2 position = new Point16(i, j).ToScreenCoordinates();
 
 			Tube tube = TerraFirma.Instance.TubeNetworkLayer[i, j];
 
@@ -83,9 +85,8 @@ namespace TerraFirma.Tiles
 
 		public override void KillMultiTile(int i, int j, int frameX, int frameY)
 		{
-			TEEntryPoint entryPoint = mod.GetTileEntity<TEEntryPoint>(i, j);
-
-			BaseLibrary.BaseLibrary.PanelGUI.UI.CloseUI(entryPoint);
+			TEEntryPoint entryPoint = Utility.GetTileEntity<TEEntryPoint>(i, j);
+			if (Main.netMode != NetmodeID.Server) BaseLibrary.BaseLibrary.PanelGUI.UI.CloseUI(entryPoint);
 
 			Item.NewItem(i * 16, j * 16, 48, 64, mod.ItemType<Items.EntryPoint>());
 			entryPoint.Kill(i, j);

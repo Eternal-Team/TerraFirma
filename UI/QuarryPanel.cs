@@ -2,6 +2,7 @@
 using BaseLibrary.UI;
 using BaseLibrary.UI.Elements;
 using ContainerLibrary;
+using EnergyLibrary;
 using TerraFirma.TileEntities;
 
 namespace TerraFirma.UI
@@ -20,13 +21,21 @@ namespace TerraFirma.UI
 				Width = (0, 1),
 				Height = (0, 1)
 			};
-			Append(gridItems);
+			//Append(gridItems);
 
-			for (int i = 0; i < Container.Handler.Items.Count; i++)
+			for (int i = 0; i < Container.Handler.Slots; i++)
 			{
 				UIContainerSlot slot = new UIContainerSlot(() => Container.Handler, i);
 				gridItems.Add(slot);
 			}
+
+			UIEnergyBar bar = new UIEnergyBar(Container)
+			{
+				HAlign = 1,
+				Height = (0, 1),
+				Width = (40, 0)
+			};
+			Append(bar);
 		}
 	}
 }

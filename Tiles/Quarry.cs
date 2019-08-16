@@ -37,9 +37,9 @@ namespace TerraFirma.Tiles
 
 		public override bool PreDraw(int i, int j, SpriteBatch spriteBatch)
 		{
-			TEQuarry quarry = mod.GetTileEntity<TEQuarry>(i, j);
+			TEQuarry quarry = Utility.GetTileEntity<TEQuarry>(i, j);
 			if (quarry == null || !Main.tile[i, j].IsTopLeft()) return false;
-
+			// todo: put in TerraFirma.cs
 			Texture2D texture = ModContent.GetTexture(Texture);
 			Vector2 position = quarry.Position.ToScreenCoordinates();
 
@@ -67,7 +67,7 @@ namespace TerraFirma.Tiles
 
 		public override void SpecialDraw(int i, int j, SpriteBatch spriteBatch)
 		{
-			TEQuarry quarry = mod.GetTileEntity<TEQuarry>(i, j);
+			TEQuarry quarry = Utility.GetTileEntity<TEQuarry>(i, j);
 			if (quarry == null || !Main.tile[i, j].IsTopLeft()) return;
 
 			Vector2 position = quarry.CurrentTile.ToScreenCoordinates();
@@ -76,14 +76,14 @@ namespace TerraFirma.Tiles
 
 		public override void RightClick(int i, int j)
 		{
-			TEQuarry quarry = mod.GetTileEntity<TEQuarry>(i, j);
+			TEQuarry quarry = Utility.GetTileEntity<TEQuarry>(i, j);
 
 			BaseLibrary.BaseLibrary.PanelGUI.UI.HandleUI(quarry);
 		}
 
 		public override void KillMultiTile(int i, int j, int frameX, int frameY)
 		{
-			TEQuarry quarry = mod.GetTileEntity<TEQuarry>(i, j);
+			TEQuarry quarry = Utility.GetTileEntity<TEQuarry>(i, j);
 
 			BaseLibrary.BaseLibrary.PanelGUI.UI.CloseUI(quarry);
 

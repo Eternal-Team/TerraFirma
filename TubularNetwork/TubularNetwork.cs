@@ -7,13 +7,13 @@ using TerraFirma.TileEntities;
 using Terraria;
 using Terraria.DataStructures;
 
-namespace TerraFirma.TubularNetwork
+namespace TerraFirma.Network
 {
 	public class TubularNetwork
 	{
 		public static List<TubularNetwork> Networks = new List<TubularNetwork>();
 
-		private List<Tube> Tiles;
+		public List<Tube> Tiles { get; }
 
 		public Color debugColor;
 
@@ -69,7 +69,7 @@ namespace TerraFirma.TubularNetwork
 				TransportingPlayer transportingPlayer = TransportingPlayers[i];
 				transportingPlayer.Update();
 
-				TFPlayer player = transportingPlayer.player.GetModPlayer<TFPlayer>();
+				TFPlayer player = transportingPlayer.player;
 				if (!player.UsingTubeSystem) TransportingPlayers.Remove(transportingPlayer);
 			}
 		}
@@ -78,91 +78,93 @@ namespace TerraFirma.TubularNetwork
 		{
 			foreach (Tube tube in Tiles)
 			{
-				TEEntryPoint entryPoint = TerraFirma.Instance.GetTileEntity<TEEntryPoint>(tube.Position);
+				TEEntryPoint entryPoint = Utility.GetTileEntity<TEEntryPoint>(tube.Position);
 				if (entryPoint != null) yield return entryPoint;
 			}
 		}
 
-		#region Pathfinding
-		private class Node
+		// todo: put this into baselibrary or layerlibrary
+		internal static class Pathfinding
 		{
-			public int X;
-			public int Y;
-
-			public int F;
-			public int G;
-			public int H;
-
-			public Node Parent;
-		}
-
-		private int ComputeHScore(Node current, Node target) => Math.Abs(target.X - current.X) + Math.Abs(target.Y - current.Y);
-
-		private IEnumerable<Node> GetNeighborNodes(Node node)
-		{
-			return Tiles.First(tube => tube.Position.X == node.X && tube.Position.Y == node.Y).GetNeighbors().Select(neighbor => new Node { X = neighbor.Position.X, Y = neighbor.Position.Y });
-		}
-
-		public Stack<Point16> FindPath(Point16 startPos, Point16 endPos)
-		{
-			Node current = null;
-			var start = new Node { X = startPos.X, Y = startPos.Y };
-			var target = new Node { X = endPos.X, Y = endPos.Y };
-			var openList = new List<Node>();
-			var closedList = new List<Node>();
-			int g = 0;
-
-			openList.Add(start);
-
-			while (openList.Count > 0)
+			private class Node
 			{
-				var lowest = openList.Min(l => l.F);
-				current = openList.First(l => l.F == lowest);
+				public int X;
+				public int Y;
 
-				closedList.Add(current);
+				public int F;
+				public int G;
+				public int H;
 
-				openList.Remove(current);
+				public Node Parent;
+			}
 
-				if (closedList.FirstOrDefault(l => l.X == target.X && l.Y == target.Y) != null) break;
+			private static int ComputeHScore(Node current, Node target) => Math.Abs(target.X - current.X) + Math.Abs(target.Y - current.Y);
 
-				var adjacentSquares = GetNeighborNodes(current);
-				g++;
+			private static IEnumerable<Node> GetNeighborNodes(IEnumerable<Tube> Tiles, Node node)
+			{
+				return Tiles.First(tube => tube.Position.X == node.X && tube.Position.Y == node.Y).GetNeighbors().Select(neighbor => new Node { X = neighbor.Position.X, Y = neighbor.Position.Y });
+			}
 
-				foreach (var adjacentSquare in adjacentSquares)
+			public static Stack<Point16> FindPath(List<Tube> network, Point16 startPos, Point16 endPos)
+			{
+				Node current = null;
+				var start = new Node { X = startPos.X, Y = startPos.Y };
+				var target = new Node { X = endPos.X, Y = endPos.Y };
+				var openList = new List<Node>();
+				var closedList = new List<Node>();
+				int g = 0;
+
+				openList.Add(start);
+
+				while (openList.Count > 0)
 				{
-					if (closedList.FirstOrDefault(l => l.X == adjacentSquare.X && l.Y == adjacentSquare.Y) != null) continue;
+					var lowest = openList.Min(l => l.F);
+					current = openList.First(l => l.F == lowest);
 
-					if (openList.FirstOrDefault(l => l.X == adjacentSquare.X && l.Y == adjacentSquare.Y) == null)
-					{
-						adjacentSquare.G = g;
-						adjacentSquare.H = ComputeHScore(adjacentSquare, target);
-						adjacentSquare.F = adjacentSquare.G + adjacentSquare.H;
-						adjacentSquare.Parent = current;
+					closedList.Add(current);
 
-						openList.Insert(0, adjacentSquare);
-					}
-					else
+					openList.Remove(current);
+
+					if (closedList.FirstOrDefault(l => l.X == target.X && l.Y == target.Y) != null) break;
+
+					var adjacentSquares = GetNeighborNodes(network, current);
+					g++;
+
+					foreach (var adjacentSquare in adjacentSquares)
 					{
-						if (g + adjacentSquare.H < adjacentSquare.F)
+						if (closedList.FirstOrDefault(l => l.X == adjacentSquare.X && l.Y == adjacentSquare.Y) != null) continue;
+
+						if (openList.FirstOrDefault(l => l.X == adjacentSquare.X && l.Y == adjacentSquare.Y) == null)
 						{
 							adjacentSquare.G = g;
+							adjacentSquare.H = ComputeHScore(adjacentSquare, target);
 							adjacentSquare.F = adjacentSquare.G + adjacentSquare.H;
 							adjacentSquare.Parent = current;
+
+							openList.Insert(0, adjacentSquare);
+						}
+						else
+						{
+							if (g + adjacentSquare.H < adjacentSquare.F)
+							{
+								adjacentSquare.G = g;
+								adjacentSquare.F = adjacentSquare.G + adjacentSquare.H;
+								adjacentSquare.Parent = current;
+							}
 						}
 					}
 				}
+
+				Stack<Point16> points = new Stack<Point16>();
+				while (current != null)
+				{
+					points.Push(new Point16(current.X, current.Y));
+
+					current = current.Parent;
+				}
+
+				return points;
 			}
-
-			Stack<Point16> points = new Stack<Point16>();
-			while (current != null)
-			{
-				points.Push(new Point16(current.X, current.Y));
-
-				current = current.Parent;
-			}
-
-			return points;
 		}
-		#endregion
 	}
 }

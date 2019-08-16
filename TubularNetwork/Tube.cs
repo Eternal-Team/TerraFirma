@@ -1,13 +1,16 @@
 ﻿using BaseLibrary;
 using LayerLibrary;
+using TerraFirma.Network.Items;
 using TerraFirma.TileEntities;
 using Terraria;
 
-namespace TerraFirma.TubularNetwork
+namespace TerraFirma.Network
 {
 	public class Tube : ModLayerElement<Tube>
 	{
-		public override string Texture => "TerraFirma/Textures/TubeNetwork2";
+		public override string Texture => "TerraFirma/Textures/TubeNetwork";
+
+		public override int DropItem => TerraFirma.Instance.ItemType<TubeItem>();
 
 		public TubularNetwork Network;
 
@@ -25,7 +28,7 @@ namespace TerraFirma.TubularNetwork
 		{
 			Network.RemoveTile(this);
 
-			TEEntryPoint entryPoint = TerraFirma.Instance.GetTileEntity<TEEntryPoint>(Position);
+			TEEntryPoint entryPoint = Utility.GetTileEntity<TEEntryPoint>(Position);
 			if (entryPoint == null) return;
 
 			WorldGen.KillTile(Position.X, Position.Y);

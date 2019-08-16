@@ -1,6 +1,5 @@
 ﻿using BaseLibrary.Items;
 using Terraria;
-using Terraria.ModLoader;
 
 namespace TerraFirma.Items
 {
@@ -25,13 +24,6 @@ namespace TerraFirma.Items
 			item.consumable = true;
 			item.createTile = mod.TileType<Tiles.Quarry>();
 			item.value = Item.sellPrice(0, 0, 50);
-		}
-
-		public override void AddRecipes()
-		{
-			ModRecipe recipe = new ModRecipe(mod);
-			recipe.SetResult(this);
-			recipe.AddRecipe();
 		}
 	}
 }

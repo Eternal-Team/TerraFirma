@@ -50,7 +50,7 @@
 //			if (ID != -1) WIMod.Instance.CloseUI(ID);
 
 //			Item.NewItem(i * 16, j * 16, 32, 32, mod.ItemType<Items.Builder>());
-//			mod.GetTileEntity<TEBuilder>().Kill(i, j);
+//			Utility.GetTileEntity<TEBuilder>().Kill(i, j);
 //		}
 
 //		public override void DrawEffects(int i, int j, SpriteBatch spriteBatch, ref Color drawColor, ref int nextSpecialDrawIndex)

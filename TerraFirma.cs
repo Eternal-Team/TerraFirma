@@ -1,12 +1,10 @@
 ﻿using BaseLibrary;
-using Microsoft.Xna.Framework;
-using TerraFirma.TubularNetwork;
-using Terraria.Graphics;
+using TerraFirma.Network;
 using Terraria.ModLoader;
 
 namespace TerraFirma
 {
-	// builder, spawner, grinder, farms, item collector (vortex chest)
+	// todo: add these - builder, spawner, grinder, farms, item collector (vortex chest), pump
 
 	public class TerraFirma : Mod
 	{
@@ -28,11 +26,6 @@ namespace TerraFirma
 			Hooking.Uninitialize();
 
 			Utility.UnloadNullableTypes();
-		}
-
-		public override void ModifyTransformMatrix(ref SpriteViewMatrix Transform)
-		{
-			Transform.Zoom = new Vector2(1f);
 		}
 	}
 }

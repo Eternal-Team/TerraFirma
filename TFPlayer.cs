@@ -1,19 +1,26 @@
 ﻿using Microsoft.Xna.Framework;
+using TerraFirma.Mounts;
+using TerraFirma.Network;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.ModLoader;
 
 namespace TerraFirma
 {
 	public class TFPlayer : ModPlayer
 	{
-		public bool UsingTubeSystem => Miniaturizing || Maximizing || Transporting;
+		public bool UsingTubeSystem => Entering || Exiting || Transporting;
 
-		public bool Miniaturizing;
-		public bool Maximizing;
+		public bool Entering;
+		public bool Exiting;
 		public bool Transporting;
 
 		public float scale = 1f;
-		public const float transferScale = 0.5f;
+		public const float transferScale = 0.4f;
+		public const float scaleSpeed = 0.01f;
+		public float alpha = 1f;
+
+		public TransportingPlayer transportingPlayer;
 
 		public override void PreUpdate()
 		{
@@ -29,38 +36,58 @@ namespace TerraFirma
 				player.immuneTime = 2;
 				player.immuneNoBlink = true;
 
-				player.velocity = new Vector2(0f, 0.0001f);
-
 				player.fullRotation = 0f;
+				player.gfxOffY = 0f;
 
-				player.gravity = 0f;
-				player.fallStart = 0;
-				player.jump = 0;
-				player.fallStart2 = 0;
-				player.wings = 0;
-				player.wingsLogic = 0;
-				player.wingTime = 0;
-				player.wingFrame = 0;
-
-				player.mount?.Dismount(player);
+				// todo: use IL editing to prevent dust spawning
+				player.mount?.SetMount(mod.MountType<TubeMount>(), player);
 			}
 
-			if (Maximizing)
+			if (Exiting)
 			{
 				Transporting = false;
 
-				if (scale < 1f) scale += 0.001f;
-				else Maximizing = false;
-			}
+				scale = 1f;
 
-			if (Miniaturizing)
-			{
-				if (scale > transferScale) scale -= 0.001f;
+				if (alpha < 1f) alpha += 0.025f;
 				else
 				{
-					Miniaturizing = false;
-					Transporting = true;
+					player.mount?.Dismount(player);
+
+					Exiting = false;
+					transportingPlayer = null;
 				}
+			}
+
+			if (Entering)
+			{
+				if (alpha > 0f) alpha -= 0.025f;
+				else
+				{
+					Entering = false;
+					Transporting = true;
+
+					scale = transferScale;
+
+					position = transportingPlayer.CurrentPosition.ToWorldCoordinates(24, 24);
+				}
+			}
+		}
+
+		public static Vector2 position;
+
+		public override void PreUpdateMovement()
+		{
+			if (Transporting)
+			{
+				Vector2 prevPos = transportingPlayer.PreviousPosition.ToWorldCoordinates(24, 24);
+				Vector2 nextPos = transportingPlayer.CurrentPosition.ToWorldCoordinates(24, 24);
+
+				Vector2 prevPoss = position;
+				position = Vector2.Lerp(prevPos, nextPos, transportingPlayer.timer / (float)TransportingPlayer.speed);
+				player.position = position;
+
+				player.fullRotation = (position - prevPoss).ToRotation() + MathHelper.PiOver2;
 			}
 		}
 
@@ -78,6 +105,11 @@ namespace TerraFirma
 				player.controlThrow = false;
 				player.gravDir = 1f;
 			}
+		}
+
+		public override bool PreHurt(bool pvp, bool quiet, ref int damage, ref int hitDirection, ref bool crit, ref bool customDamage, ref bool playSound, ref bool genGore, ref PlayerDeathReason damageSource)
+		{
+			return !UsingTubeSystem && base.PreHurt(pvp, quiet, ref damage, ref hitDirection, ref crit, ref customDamage, ref playSound, ref genGore, ref damageSource);
 		}
 	}
 }

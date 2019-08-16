@@ -25,7 +25,7 @@ namespace TerraFirma.UI
 
 			if (evt.Target != this) return;
 
-			//Grid.items.ForEach(item => item.Selected = false);
+			//Grid.Items.ForEach(item => item.Selected = false);
 			//Selected = true;
 		}
 
