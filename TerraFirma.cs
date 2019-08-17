@@ -4,7 +4,7 @@ using Terraria.ModLoader;
 
 namespace TerraFirma
 {
-	// todo: add these - builder, spawner, grinder, farms, item collector (vortex chest), pump
+	// todo: add these - builder, spawner, grinder, farms, item collector (vortex chest), pump, pipes (several channels)
 
 	public class TerraFirma : Mod
 	{

@@ -20,7 +20,8 @@ namespace TerraFirma
 			Main.OnRenderTargetsInitialized += InitializePlayerTargets;
 			Main.OnRenderTargetsReleased += ReleasePlayerTargets;
 
-			On.Terraria.Main.DoDraw += DrawPlayersToTargets;
+			Main.OnPreDraw += Main_OnPreDraw;
+
 			On.Terraria.Main.DrawPlayers += Main_DrawPlayers;
 			On.Terraria.Main.DrawPlayer_DrawAllLayers += DrawPlayerToTarget;
 			On.Terraria.Main.DrawPlayer += FixPlayerSize;
@@ -32,22 +33,20 @@ namespace TerraFirma
 			Dispatcher.Dispatch(() => Main.instance.InvokeMethod<object>("InitTargets"));
 		}
 
-		internal static void Uninitialize()
-		{
-			Main.OnRenderTargetsInitialized -= InitializePlayerTargets;
-			Main.OnRenderTargetsReleased -= ReleasePlayerTargets;
-		}
-
-		private static void DrawPlayersToTargets(On.Terraria.Main.orig_DoDraw orig, Main self, GameTime gameTime)
+		private static void Main_OnPreDraw(GameTime obj)
 		{
 			// todo: maybe neatify this
 			DrawToTarget = true;
 			Main.instance.InvokeMethod<object>("DrawPlayers");
 			DrawToTarget = false;
-
-			orig(self, gameTime);
 		}
 
+		internal static void Uninitialize()
+		{
+			Main.OnRenderTargetsInitialized -= InitializePlayerTargets;
+			Main.OnRenderTargetsReleased -= ReleasePlayerTargets;
+		}
+		
 		private static void Main_DrawPlayers(On.Terraria.Main.orig_DrawPlayers orig, Main self)
 		{
 			if (DrawToTarget) orig(self);
@@ -112,6 +111,8 @@ namespace TerraFirma
 					SpriteBatchState state = Utility.End(Main.spriteBatch);
 					Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.Default, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.ZoomMatrix);
 
+					TerraFirma.Instance.TubeNetworkLayer.Draw(Main.spriteBatch);
+					
 					foreach (Player player in Main.player)
 					{
 						if (player == null || !player.active || player.dead || playerTargets[player.whoAmI].IsDisposed) continue;
@@ -124,13 +125,13 @@ namespace TerraFirma
 								new Vector2(Main.screenWidth, Main.screenHeight) * 0.5f
 								- new Vector2(6, 8)
 								, null, Color.White * alpha, 0f, target.Size() * 0.5f, 0.5f, SpriteEffects.None, 0f);
-							Main.NewText(alpha);
-							//Terraria.Main.instance.DrawPlayer(player, TFPlayer.position - player.Size * 0.5f + new Vector2(2, 4), player.fullRotation, player.Size * 0.5f);
+
+							// rotate the entire spritebatch instead of using player.fullRotation?
 						}
 					}
 
-					TerraFirma.Instance.TubeNetworkLayer.Draw(Main.spriteBatch);
-
+					TerraFirma.Instance.TubeNetworkLayer.PostDraw(Main.spriteBatch);
+					
 					Main.spriteBatch.End();
 					Main.spriteBatch.Begin(state);
 				});
