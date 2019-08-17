@@ -31,7 +31,7 @@ namespace TerraFirma.Network
 		{
 			Network.RemoveTile(this);
 
-			TEEntryPoint entryPoint = Utility.GetTileEntity<TEEntryPoint>(Position);
+			EntryPoint entryPoint = Utility.GetTileEntity<EntryPoint>(Position);
 			if (entryPoint == null) return;
 
 			WorldGen.KillTile(Position.X, Position.Y);
@@ -44,7 +44,7 @@ namespace TerraFirma.Network
 
 		public void PostDraw(SpriteBatch spriteBatch)
 		{
-			Vector2 position = Position.ToVector2() * 16 - Main.screenPosition;
+			Vector2 position = Position.ToScreenCoordinates(false);
 
 			for (int x = 0; x < Layer.TileSize; x++)
 			{

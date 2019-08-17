@@ -1,6 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
+using System.Collections.Generic;
 using TerraFirma.Mounts;
 using TerraFirma.Network;
+using TerraFirma.TileEntities;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
@@ -76,8 +78,34 @@ namespace TerraFirma
 
 		public static Vector2 position;
 
+		public override void FrameEffects()
+		{
+			//if (usingElevator) player.bodyFrame.Y = 0;
+		}
+
+		public bool usingElevator;
+
 		public override void PreUpdateMovement()
 		{
+			usingElevator = false;
+
+			foreach (TileEntity tileEntity in TileEntity.ByID.Values)
+			{
+				if (tileEntity is Elevator elevator)
+				{
+					if (
+						player.position.X + player.width >= elevator.position.X &&
+						player.position.X <= elevator.position.X + 48f &&
+						player.position.Y + player.height <= elevator.oldPosition.Y &&
+						player.position.Y + player.height + player.velocity.Y >= elevator.position.Y)
+					{
+						player.velocity.Y = elevator.position.Y - elevator.oldPosition.Y;
+
+						usingElevator = true;
+					}
+				}
+			}
+
 			if (Transporting)
 			{
 				Vector2 prevPos = transportingPlayer.PreviousPosition.ToWorldCoordinates(24, 24);
@@ -110,6 +138,11 @@ namespace TerraFirma
 		public override bool PreHurt(bool pvp, bool quiet, ref int damage, ref int hitDirection, ref bool crit, ref bool customDamage, ref bool playSound, ref bool genGore, ref PlayerDeathReason damageSource)
 		{
 			return !UsingTubeSystem && base.PreHurt(pvp, quiet, ref damage, ref hitDirection, ref crit, ref customDamage, ref playSound, ref genGore, ref damageSource);
+		}
+
+		public override void ModifyDrawLayers(List<PlayerLayer> layers)
+		{
+			if (usingElevator) layers.RemoveAt(layers.FindIndex(l => l.Name == "Wings"));
 		}
 	}
 }

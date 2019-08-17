@@ -7,14 +7,13 @@ using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TerraFirma.Tiles;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 
 namespace TerraFirma.TileEntities
 {
-	public class TEQuarry : BaseTE, IItemHandler, IHasUI, IEnergyHandler
+	public class Quarry : BaseTE, IItemHandler, IHasUI, IEnergyHandler
 	{
 		//public int pickPower = 30;
 		//public int speed = 30;
@@ -24,7 +23,7 @@ namespace TerraFirma.TileEntities
 
 		public Point CurrentTile;
 
-		public override Type TileType => typeof(Quarry);
+		public override Type TileType => typeof(Tiles.Quarry);
 
 		public ItemHandler Handler { get; }
 		public EnergyHandler EnergyHandler { get; }
@@ -44,7 +43,7 @@ namespace TerraFirma.TileEntities
 
 		private List<Point> NextTiles;
 
-		public TEQuarry()
+		public Quarry()
 		{
 			Handler = new ItemHandler(27);
 			EnergyHandler = new EnergyHandler(long.MaxValue, 10000);

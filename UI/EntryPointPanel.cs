@@ -10,7 +10,7 @@ using Terraria.DataStructures;
 
 namespace TerraFirma.UI
 {
-	public class EntryPointPanel : BaseUIPanel<TEEntryPoint>
+	public class EntryPointPanel : BaseUIPanel<EntryPoint>
 	{
 		private UIGrid<UIEntryPointItem> gridLocations;
 
@@ -71,7 +71,7 @@ namespace TerraFirma.UI
 		{
 			gridLocations.Clear();
 
-			foreach (TEEntryPoint entryPoint in TerraFirma.Instance.TubeNetworkLayer[Container.Position].Network.GetEntryPoints())
+			foreach (EntryPoint entryPoint in TerraFirma.Instance.TubeNetworkLayer[Container.Position].Network.GetEntryPoints())
 			{
 				if (entryPoint == Container) continue;
 

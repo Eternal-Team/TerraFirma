@@ -2,7 +2,6 @@
 using BaseLibrary.Tiles;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using TerraFirma.TileEntities;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.Enums;
@@ -26,7 +25,7 @@ namespace TerraFirma.Tiles
 			TileObjectData.newTile.Origin = new Point16(0, 2);
 			TileObjectData.newTile.CoordinateHeights = new[] { 16, 16, 16 };
 			TileObjectData.newTile.AnchorBottom = new AnchorData(AnchorType.EmptyTile | AnchorType.SolidTile, 3, 0);
-			TileObjectData.newTile.HookPostPlaceMyPlayer = new PlacementHook(mod.GetTileEntity<TEQuarry>().Hook_AfterPlacement, -1, 0, false);
+			TileObjectData.newTile.HookPostPlaceMyPlayer = new PlacementHook(mod.GetTileEntity<TileEntities.Quarry>().Hook_AfterPlacement, -1, 0, false);
 			TileObjectData.addTile(Type);
 			disableSmartCursor = true;
 
@@ -37,7 +36,7 @@ namespace TerraFirma.Tiles
 
 		public override bool PreDraw(int i, int j, SpriteBatch spriteBatch)
 		{
-			TEQuarry quarry = Utility.GetTileEntity<TEQuarry>(i, j);
+			TileEntities.Quarry quarry = Utility.GetTileEntity<TileEntities.Quarry>(i, j);
 			if (quarry == null || !Main.tile[i, j].IsTopLeft()) return false;
 			// todo: put in TerraFirma.cs
 			Texture2D texture = ModContent.GetTexture(Texture);
@@ -67,7 +66,7 @@ namespace TerraFirma.Tiles
 
 		public override void SpecialDraw(int i, int j, SpriteBatch spriteBatch)
 		{
-			TEQuarry quarry = Utility.GetTileEntity<TEQuarry>(i, j);
+			TileEntities.Quarry quarry = Utility.GetTileEntity<TileEntities.Quarry>(i, j);
 			if (quarry == null || !Main.tile[i, j].IsTopLeft()) return;
 
 			Vector2 position = quarry.CurrentTile.ToScreenCoordinates();
@@ -76,14 +75,14 @@ namespace TerraFirma.Tiles
 
 		public override void RightClick(int i, int j)
 		{
-			TEQuarry quarry = Utility.GetTileEntity<TEQuarry>(i, j);
+			TileEntities.Quarry quarry = Utility.GetTileEntity<TileEntities.Quarry>(i, j);
 
 			BaseLibrary.BaseLibrary.PanelGUI.UI.HandleUI(quarry);
 		}
 
 		public override void KillMultiTile(int i, int j, int frameX, int frameY)
 		{
-			TEQuarry quarry = Utility.GetTileEntity<TEQuarry>(i, j);
+			TileEntities.Quarry quarry = Utility.GetTileEntity<TileEntities.Quarry>(i, j);
 
 			BaseLibrary.BaseLibrary.PanelGUI.UI.CloseUI(quarry);
 

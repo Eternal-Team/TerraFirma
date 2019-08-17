@@ -22,15 +22,43 @@ namespace TerraFirma
 
 			Main.OnPreDraw += Main_OnPreDraw;
 
+			On.Terraria.Player.PlayerFrame += Player_PlayerFrame;
+
 			On.Terraria.Main.DrawPlayers += Main_DrawPlayers;
 			On.Terraria.Main.DrawPlayer_DrawAllLayers += DrawPlayerToTarget;
 			On.Terraria.Main.DrawPlayer += FixPlayerSize;
+
+			On.Terraria.Main.DrawPlayer += Main_DrawPlayer;
 
 			On.Terraria.Main.EnsureRenderTargetContent += Main_EnsureRenderTargetContent;
 
 			IL.Terraria.Main.DoDraw += DrawTubes;
 
 			Dispatcher.Dispatch(() => Main.instance.InvokeMethod<object>("InitTargets"));
+		}
+
+		private static void Main_DrawPlayer(On.Terraria.Main.orig_DrawPlayer orig, Main self, Player drawPlayer, Vector2 Position, float rotation, Vector2 rotationOrigin, float shadow)
+		{
+			float velocityY = drawPlayer.velocity.Y;
+			drawPlayer.velocity.Y = 0f;
+
+			orig(self, drawPlayer, Position, rotation, rotationOrigin, shadow);
+
+			drawPlayer.velocity.Y = velocityY;
+		}
+
+		private static void Player_PlayerFrame(On.Terraria.Player.orig_PlayerFrame orig, Player self)
+		{
+			if (self.GetModPlayer<TFPlayer>().usingElevator)
+			{
+				float velocityY = self.velocity.Y;
+				self.velocity.Y = 0f;
+
+				orig(self);
+
+				self.velocity.Y = velocityY;
+			}
+			else orig(self);
 		}
 
 		private static void Main_OnPreDraw(GameTime obj)
@@ -46,7 +74,7 @@ namespace TerraFirma
 			Main.OnRenderTargetsInitialized -= InitializePlayerTargets;
 			Main.OnRenderTargetsReleased -= ReleasePlayerTargets;
 		}
-		
+
 		private static void Main_DrawPlayers(On.Terraria.Main.orig_DrawPlayers orig, Main self)
 		{
 			if (DrawToTarget) orig(self);
@@ -112,7 +140,7 @@ namespace TerraFirma
 					Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.Default, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.ZoomMatrix);
 
 					TerraFirma.Instance.TubeNetworkLayer.Draw(Main.spriteBatch);
-					
+
 					foreach (Player player in Main.player)
 					{
 						if (player == null || !player.active || player.dead || playerTargets[player.whoAmI].IsDisposed) continue;
@@ -126,12 +154,12 @@ namespace TerraFirma
 								- new Vector2(6, 8)
 								, null, Color.White * alpha, 0f, target.Size() * 0.5f, 0.5f, SpriteEffects.None, 0f);
 
-							// rotate the entire spritebatch instead of using player.fullRotation?
+							// note: rotate the entire spritebatch instead of using player.fullRotation?
 						}
 					}
 
 					TerraFirma.Instance.TubeNetworkLayer.PostDraw(Main.spriteBatch);
-					
+
 					Main.spriteBatch.End();
 					Main.spriteBatch.Begin(state);
 				});

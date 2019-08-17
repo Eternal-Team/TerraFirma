@@ -6,12 +6,12 @@ namespace TerraFirma.UI
 {
 	public class UIEntryPointItem : UIPanel, IGridElement<UIEntryPointItem>
 	{
-		public TEEntryPoint EntryPoint;
+		public EntryPoint EntryPoint;
 		//public bool Selected;
 
 		public UIGrid<UIEntryPointItem> Grid { get; set; }
 
-		public UIEntryPointItem(TEEntryPoint entryPoint)
+		public UIEntryPointItem(EntryPoint entryPoint)
 		{
 			EntryPoint = entryPoint;
 

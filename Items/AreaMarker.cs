@@ -76,7 +76,7 @@
 //		//{
 //		//	try
 //		//	{
-//		//		int ID = BaseContainer.GetID(Utility.MouseToWorldPoint(), typeof(TEQuarry));
+//		//		int ID = BaseContainer.GetID(Utility.MouseToWorldPoint(), typeof(Quarry));
 //		//		if (ID == -1)
 //		//		{
 //		//			if (markerData.starting)
@@ -97,7 +97,7 @@
 //		//		}
 //		//		else
 //		//		{
-//		//			((TEQuarry)TileEntity.ByID[ID]).SetArea(markerData.start, markerData.end);
+//		//			((Quarry)TileEntity.ByID[ID]).SetArea(markerData.start, markerData.end);
 //		//			NetUtility.ClientSendTEUpdate(ID);
 //		//			Main.NewText($"Quarry's area has been changed");
 //		//		}

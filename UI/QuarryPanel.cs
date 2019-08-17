@@ -7,7 +7,7 @@ using TerraFirma.TileEntities;
 
 namespace TerraFirma.UI
 {
-	public class QuarryPanel : BaseUIPanel<TEQuarry>
+	public class QuarryPanel : BaseUIPanel<Quarry>
 	{
 		public override void OnInitialize()
 		{

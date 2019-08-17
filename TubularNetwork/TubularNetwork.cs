@@ -74,11 +74,11 @@ namespace TerraFirma.Network
 			}
 		}
 
-		public IEnumerable<TEEntryPoint> GetEntryPoints()
+		public IEnumerable<EntryPoint> GetEntryPoints()
 		{
 			foreach (Tube tube in Tiles)
 			{
-				TEEntryPoint entryPoint = Utility.GetTileEntity<TEEntryPoint>(tube.Position);
+				EntryPoint entryPoint = Utility.GetTileEntity<EntryPoint>(tube.Position);
 				if (entryPoint != null) yield return entryPoint;
 			}
 		}

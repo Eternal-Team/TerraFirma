@@ -3,7 +3,6 @@ using BaseLibrary.Tiles;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using TerraFirma.Network;
-using TerraFirma.TileEntities;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
@@ -32,7 +31,7 @@ namespace TerraFirma.Tiles
 			TileObjectData.newTile.CoordinateHeights = new[] { 16, 16, 16, 16 };
 			TileObjectData.newTile.CoordinateWidth = 16;
 			TileObjectData.newTile.CoordinatePadding = 2;
-			TileObjectData.newTile.HookPostPlaceMyPlayer = new PlacementHook(mod.GetTileEntity<TEEntryPoint>().Hook_AfterPlacement, -1, 0, false);
+			TileObjectData.newTile.HookPostPlaceMyPlayer = new PlacementHook(mod.GetTileEntity<TileEntities.EntryPoint>().Hook_AfterPlacement, -1, 0, false);
 			TileObjectData.addTile(Type);
 			disableSmartCursor = true;
 
@@ -43,7 +42,7 @@ namespace TerraFirma.Tiles
 
 		public override void RightClick(int i, int j)
 		{
-			TEEntryPoint entryPoint = Utility.GetTileEntity<TEEntryPoint>(i, j);
+			TileEntities.EntryPoint entryPoint = Utility.GetTileEntity<TileEntities.EntryPoint>(i, j);
 			if (entryPoint == null) return;
 
 			BaseLibrary.BaseLibrary.PanelGUI.UI.HandleUI(entryPoint);
@@ -60,7 +59,7 @@ namespace TerraFirma.Tiles
 
 		public override void SpecialDraw(int i, int j, SpriteBatch spriteBatch)
 		{
-			TEEntryPoint entryPoint = Utility.GetTileEntity<TEEntryPoint>(i, j);
+			TileEntities.EntryPoint entryPoint = Utility.GetTileEntity<TileEntities.EntryPoint>(i, j);
 			if (entryPoint == null || !Main.tile[i, j].IsTopLeft()) return;
 
 			Vector2 position = new Point16(i, j).ToScreenCoordinates();
@@ -85,7 +84,7 @@ namespace TerraFirma.Tiles
 
 		public override void KillMultiTile(int i, int j, int frameX, int frameY)
 		{
-			TEEntryPoint entryPoint = Utility.GetTileEntity<TEEntryPoint>(i, j);
+			TileEntities.EntryPoint entryPoint = Utility.GetTileEntity<TileEntities.EntryPoint>(i, j);
 			if (Main.netMode != NetmodeID.Server) BaseLibrary.BaseLibrary.PanelGUI.UI.CloseUI(entryPoint);
 
 			Item.NewItem(i * 16, j * 16, 48, 64, mod.ItemType<Items.EntryPoint>());
