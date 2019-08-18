@@ -1,6 +1,7 @@
 ﻿using BaseLibrary;
 using BaseLibrary.UI;
 using BaseLibrary.UI.Elements;
+using LayerLibrary;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using TerraFirma.Network;
@@ -83,7 +84,7 @@ namespace TerraFirma.UI
 				entryPointItem.OnClick += (evt, element) =>
 				{
 					TubularNetwork network = TerraFirma.Instance.TubeNetworkLayer[Container.Position].Network;
-					Stack<Point16> path = TubularNetwork.Pathfinding.FindPath(network.Tiles, Container.Position, entryPoint.Position);
+					Stack<Point16> path = Pathfinding.FindPath(network.Tiles, Container.Position, entryPoint.Position);
 
 					TransportingPlayer transfer = new TransportingPlayer(Main.LocalPlayer, path);
 

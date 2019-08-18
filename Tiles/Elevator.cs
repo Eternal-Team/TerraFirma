@@ -11,17 +11,19 @@ namespace TerraFirma.Tiles
 {
 	public class Elevator : BaseTile
 	{
+		public override string Texture => "TerraFirma/Textures/Tiles/Elevator";
+
 		public override void SetDefaults()
 		{
-			Main.tileSolid[Type] = false;
+			Main.tileSolidTop[Type] = true;
 			Main.tileFrameImportant[Type] = true;
 			Main.tileNoAttach[Type] = true;
 			Main.tileLavaDeath[Type] = false;
 
-			TileObjectData.newTile.Width = 3;
+			TileObjectData.newTile.Width = 5;
 			TileObjectData.newTile.Height = 1;
 			TileObjectData.newTile.Origin = new Point16(0, 0);
-			TileObjectData.newTile.AnchorBottom = new AnchorData(AnchorType.SolidTile, 3, 0);
+			TileObjectData.newTile.AnchorBottom = new AnchorData(AnchorType.SolidTile, 5, 0);
 			TileObjectData.newTile.UsesCustomCanPlace = true;
 			TileObjectData.newTile.CoordinateHeights = new[] { 16 };
 			TileObjectData.newTile.CoordinateWidth = 16;

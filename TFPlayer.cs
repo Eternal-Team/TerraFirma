@@ -16,13 +16,15 @@ namespace TerraFirma
 		public bool Entering;
 		public bool Exiting;
 		public bool Transporting;
+		public bool UsingElevator;
 
 		public float scale = 1f;
 		public const float transferScale = 0.4f;
-		public const float scaleSpeed = 0.01f;
 		public float alpha = 1f;
 
 		public TransportingPlayer transportingPlayer;
+
+		//public static Vector2 position;
 
 		public override void PreUpdate()
 		{
@@ -71,56 +73,70 @@ namespace TerraFirma
 
 					scale = transferScale;
 
-					position = transportingPlayer.CurrentPosition.ToWorldCoordinates(24, 24);
+					player.position = transportingPlayer.CurrentPosition.ToWorldCoordinates(24, 24);
 				}
 			}
 		}
 
-		public static Vector2 position;
-
-		public override void FrameEffects()
-		{
-			//if (usingElevator) player.bodyFrame.Y = 0;
-		}
-
-		public bool usingElevator;
-
 		public override void PreUpdateMovement()
 		{
-			usingElevator = false;
+			UsingElevator = false;
 
 			foreach (TileEntity tileEntity in TileEntity.ByID.Values)
 			{
 				if (tileEntity is Elevator elevator)
 				{
 					if (
-						player.position.X + player.width >= elevator.position.X &&
-						player.position.X <= elevator.position.X + 48f &&
+						player.position.X + player.width >= elevator.position.X + 16f &&
+						player.position.X <= elevator.position.X + 80f &&
 						player.position.Y + player.height <= elevator.oldPosition.Y &&
 						player.position.Y + player.height + player.velocity.Y >= elevator.position.Y)
 					{
 						player.velocity.Y = elevator.position.Y - elevator.oldPosition.Y;
 
-						usingElevator = true;
+						UsingElevator = true;
 					}
 				}
 			}
 
 			if (Transporting)
 			{
-				Vector2 prevPos = transportingPlayer.PreviousPosition.ToWorldCoordinates(24, 24);
-				Vector2 nextPos = transportingPlayer.CurrentPosition.ToWorldCoordinates(24, 24);
+				Vector2 oldPosition = player.position;
+				player.position = Vector2.Lerp(transportingPlayer.PreviousPosition.ToWorldCoordinates(24, 24), transportingPlayer.CurrentPosition.ToWorldCoordinates(24, 24), transportingPlayer.timer / (float)TransportingPlayer.speed);
 
-				Vector2 prevPoss = position;
-				position = Vector2.Lerp(prevPos, nextPos, transportingPlayer.timer / (float)TransportingPlayer.speed);
-				player.position = position;
+				player.fullRotation = (player.position - oldPosition).ToRotation() + MathHelper.PiOver2;
+			}
+		}
 
-				player.fullRotation = (position - prevPoss).ToRotation() + MathHelper.PiOver2;
+		public static void Update(Player player)
+		{
+			if (player == null || !player.active) return;
+
+			TFPlayer tfPlayer = player.GetModPlayer<TFPlayer>();
+
+			if (tfPlayer.UsingElevator)
+			{
+				player.maxFallSpeed = 5000f;
+				player.gravity = 50f;
 			}
 		}
 
 		public override void SetControls()
 		{
+			if (UsingElevator)
+			{
+				foreach (TileEntity tileEntity in TileEntity.ByID.Values)
+				{
+					if (tileEntity is Elevator elevator)
+					{
+						if (player.controlDown) elevator.direction = 1;
+						else if (player.controlUp) elevator.direction = -1;
+					}
+				}
+
+				player.controlJump = false;
+			}
+
 			if (UsingTubeSystem)
 			{
 				player.controlJump = false;
@@ -142,7 +158,7 @@ namespace TerraFirma
 
 		public override void ModifyDrawLayers(List<PlayerLayer> layers)
 		{
-			if (usingElevator) layers.RemoveAt(layers.FindIndex(l => l.Name == "Wings"));
+			if (UsingElevator) layers.RemoveAt(layers.FindIndex(l => l.Name == "Wings"));
 		}
 	}
 }

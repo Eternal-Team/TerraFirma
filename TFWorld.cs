@@ -15,14 +15,16 @@ namespace TerraFirma
 		public override void PostDrawTiles()
 		{
 			Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.Default, RasterizerState.CullCounterClockwise, null, Main.GameViewMatrix.ZoomMatrix);
-			
+
 			foreach (TileEntity tileEntity in TileEntity.ByID.Values)
 			{
 				if (tileEntity is Elevator elevator)
 				{
 					Vector2 position = elevator.position - Main.screenPosition;
-
-					Main.spriteBatch.Draw(Main.magicPixel, new Rectangle((int)position.X, (int)position.Y, 48, 16), null, Color.DimGray, 0f, Vector2.Zero, SpriteEffects.None, 0f);
+					position.Y -= 74f;
+					position.X += 16f;
+					Main.spriteBatch.Draw(ModContent.GetTexture("TerraFirma/Textures/Tiles/ElevatorCage"),
+						position, null, Color.DimGray, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
 				}
 			}
 

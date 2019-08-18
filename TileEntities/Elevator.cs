@@ -1,6 +1,8 @@
-﻿using BaseLibrary.Tiles.TileEntites;
+﻿using BaseLibrary;
+using BaseLibrary.Tiles.TileEntites;
 using Microsoft.Xna.Framework;
 using System;
+using TerraFirma.Tiles;
 using Terraria;
 
 namespace TerraFirma.TileEntities
@@ -12,33 +14,25 @@ namespace TerraFirma.TileEntities
 		public Vector2 position;
 		public Vector2 oldPosition;
 
-		private int progress;
-		private int speed = 1;
+		public int direction = 0;
 
-		private static float gauss(float x, float a, float b, float c)
-		{
-			var v1 = (x - b) / (2d * c * c);
-			var v2 = -v1 * v1 / 2d;
-			var v3 = a * (float)Math.Exp(v2);
-
-			return v3;
-		}
+		private float velocity;
 
 		public override void Update()
 		{
-			if (position == Vector2.Zero || oldPosition == Vector2.Zero) position = oldPosition = Position.ToVector2() * 16;
+			// also needs to check for solid tiles in elevator area
 
-			if (progress > 160 || progress < 0) speed *= -1;
-			progress += speed;
+			int index = 1;
+			while (Main.tile[Position.X, Position.Y - index].type == mod.TileType<ElevatorRail>() && Main.tile[Position.X + 4, Position.Y - index].type == mod.TileType<ElevatorRail>()) index++;
+			index--;
+
+			if (position == Vector2.Zero || oldPosition == Vector2.Zero) position = oldPosition = Position.ToVector2() * 16 - new Vector2(16f, index * 16f);
 
 			oldPosition = position;
+			if (direction == 0) return;
 
-			float avg = 80f;
-			float amp = 10f;
-			float sd = 3.5f;
-
-			float s = gauss(progress, amp, avg, sd) * -speed;
-			position.Y += s;
+			position.Y = Utility.SmoothDamp(position.Y, direction == -1 ? Position.Y * 16 - index * 16 + 2f : Position.Y * 16, ref velocity, 0.5f, 1500f, 0.01666667f);
+			Main.NewText(position.Y);
 		}
 	}
 }

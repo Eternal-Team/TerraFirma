@@ -1,6 +1,7 @@
 ﻿using BaseLibrary;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System;
 using System.Linq;
@@ -13,13 +14,14 @@ namespace TerraFirma
 		private static RenderTarget2D[] playerTargets;
 		private static bool DrawToTarget;
 
+		internal static GameTime gameTime;
+
 		internal static void Initialize()
 		{
 			playerTargets = new RenderTarget2D[Main.player.Length];
 
 			Main.OnRenderTargetsInitialized += InitializePlayerTargets;
 			Main.OnRenderTargetsReleased += ReleasePlayerTargets;
-
 			Main.OnPreDraw += Main_OnPreDraw;
 
 			On.Terraria.Player.PlayerFrame += Player_PlayerFrame;
@@ -34,22 +36,47 @@ namespace TerraFirma
 
 			IL.Terraria.Main.DoDraw += DrawTubes;
 
+			On.Terraria.Main.DoUpdate += Main_DoUpdate;
+
+			IL.Terraria.Player.Update += Player_Update;
+
 			Dispatcher.Dispatch(() => Main.instance.InvokeMethod<object>("InitTargets"));
+		}
+
+		private static void Main_DoUpdate(On.Terraria.Main.orig_DoUpdate orig, Main self, GameTime gameTime)
+		{
+			Hooking.gameTime = gameTime;
+
+			orig(self, gameTime);
+		}
+
+		private static void Player_Update(ILContext il)
+		{
+			ILCursor cursor = new ILCursor(il);
+
+			if (cursor.TryGotoNext(i => i.MatchLdarg(0), i => i.MatchLdfld<Player>("mount"), i => i.MatchCallvirt<Mount>("get_Active"), i => i.MatchBrfalse(out _)))
+			{
+				cursor.Emit(OpCodes.Ldarg, 0);
+
+				cursor.EmitDelegate<Action<Player>>(TFPlayer.Update);
+			}
+
+			/*
+			IL_879D: ldarg.0
+			IL_879E: ldfld     class Terraria.Mount Terraria.Player::mount
+			IL_87A3: callvirt  instance bool Terraria.Mount::get_Active()
+			IL_87A8: brfalse.s IL_87BB
+			*/
 		}
 
 		private static void Main_DrawPlayer(On.Terraria.Main.orig_DrawPlayer orig, Main self, Player drawPlayer, Vector2 Position, float rotation, Vector2 rotationOrigin, float shadow)
 		{
-			float velocityY = drawPlayer.velocity.Y;
-			drawPlayer.velocity.Y = 0f;
-
 			orig(self, drawPlayer, Position, rotation, rotationOrigin, shadow);
-
-			drawPlayer.velocity.Y = velocityY;
 		}
 
 		private static void Player_PlayerFrame(On.Terraria.Player.orig_PlayerFrame orig, Player self)
 		{
-			if (self.GetModPlayer<TFPlayer>().usingElevator)
+			if (self.GetModPlayer<TFPlayer>().UsingElevator)
 			{
 				float velocityY = self.velocity.Y;
 				self.velocity.Y = 0f;
