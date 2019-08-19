@@ -15,7 +15,6 @@ namespace TerraFirma.Tiles
 	{
 		public override string Texture => "TerraFirma/Textures/Tiles/EntryPoint";
 
-		// todo: possibly in TerraFirma.cs
 		private static Texture2D _connectionTexture;
 		public static Texture2D ConnectionTexture => _connectionTexture ?? (_connectionTexture = ModContent.GetTexture("TerraFirma/Textures/Tiles/EntryPoint_Connection"));
 

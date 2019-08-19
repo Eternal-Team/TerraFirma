@@ -38,7 +38,7 @@ namespace TerraFirma.Tiles
 		{
 			TileEntities.Quarry quarry = Utility.GetTileEntity<TileEntities.Quarry>(i, j);
 			if (quarry == null || !Main.tile[i, j].IsTopLeft()) return false;
-			// todo: put in TerraFirma.cs
+
 			Texture2D texture = ModContent.GetTexture(Texture);
 			Vector2 position = quarry.Position.ToScreenCoordinates();
 

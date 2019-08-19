@@ -22,7 +22,6 @@ namespace TerraFirma
 				{
 					Vector2 position = elevator.position - Main.screenPosition;
 					position.Y -= 74f;
-					position.X += 16f;
 					Main.spriteBatch.Draw(ModContent.GetTexture("TerraFirma/Textures/Tiles/ElevatorCage"),
 						position, null, Color.DimGray, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
 				}

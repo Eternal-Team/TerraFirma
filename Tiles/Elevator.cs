@@ -15,7 +15,6 @@ namespace TerraFirma.Tiles
 
 		public override void SetDefaults()
 		{
-			Main.tileSolidTop[Type] = true;
 			Main.tileFrameImportant[Type] = true;
 			Main.tileNoAttach[Type] = true;
 			Main.tileLavaDeath[Type] = false;

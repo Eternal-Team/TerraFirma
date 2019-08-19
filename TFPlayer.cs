@@ -24,8 +24,6 @@ namespace TerraFirma
 
 		public TransportingPlayer transportingPlayer;
 
-		//public static Vector2 position;
-
 		public override void PreUpdate()
 		{
 			if (UsingTubeSystem)
@@ -53,6 +51,9 @@ namespace TerraFirma
 
 				scale = 1f;
 
+				// todo: lerp player position to this
+				player.position = transportingPlayer.CurrentPosition.ToWorldCoordinates(24 - Player.defaultWidth * 0.5f, 64 - Player.defaultHeight);
+
 				if (alpha < 1f) alpha += 0.025f;
 				else
 				{
@@ -72,7 +73,7 @@ namespace TerraFirma
 					Transporting = true;
 
 					scale = transferScale;
-
+					// todo: lerp player position to this
 					player.position = transportingPlayer.CurrentPosition.ToWorldCoordinates(24, 24);
 				}
 			}
@@ -87,7 +88,7 @@ namespace TerraFirma
 				if (tileEntity is Elevator elevator)
 				{
 					if (
-						player.position.X + player.width >= elevator.position.X + 16f &&
+						player.position.X + player.width >= elevator.position.X &&
 						player.position.X <= elevator.position.X + 80f &&
 						player.position.Y + player.height <= elevator.oldPosition.Y &&
 						player.position.Y + player.height + player.velocity.Y >= elevator.position.Y)
@@ -102,6 +103,8 @@ namespace TerraFirma
 			if (Transporting)
 			{
 				Vector2 oldPosition = player.position;
+
+				// note: maybe not interpolate from prev to next, but current to next?
 				player.position = Vector2.Lerp(transportingPlayer.PreviousPosition.ToWorldCoordinates(24, 24), transportingPlayer.CurrentPosition.ToWorldCoordinates(24, 24), transportingPlayer.timer / (float)TransportingPlayer.speed);
 
 				player.fullRotation = (player.position - oldPosition).ToRotation() + MathHelper.PiOver2;
