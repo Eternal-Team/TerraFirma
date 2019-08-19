@@ -6,6 +6,7 @@ using MonoMod.Cil;
 using On.Terraria;
 using System;
 using System.Linq;
+using Terraria.ID;
 
 namespace TerraFirma
 {
@@ -78,6 +79,8 @@ namespace TerraFirma
 
 		private static void DrawPlayersToTargets(GameTime obj)
 		{
+			if (Terraria.Main.gameMenu || Terraria.Main.netMode == NetmodeID.Server || Terraria.Main.mapFullscreen) return;
+
 			GraphicsDevice graphicsDevice = Terraria.Main.graphics.GraphicsDevice;
 
 			for (int i = 0; i < 255; i++)
